@@ -1,8 +1,6 @@
 package net.corda.training.contract
 
-import net.corda.core.contracts.CommandData
-import net.corda.core.contracts.Contract
-import net.corda.core.contracts.requireSingleCommand
+import net.corda.core.contracts.*
 import net.corda.core.transactions.LedgerTransaction
 import net.corda.training.state.IOUState
 
@@ -22,19 +20,41 @@ class IOUContract : Contract {
      * function to check for a number of commands which implement this interface.
      */
     interface Commands : CommandData {
-        // Add commands here.
-        // E.g
-        // class DoSomething : TypeOnlyCommandData(), Commands
-    }
+        class Issue :TypeOnlyCommandData(), Commands
+        class Transfer :TypeOnlyCommandData(), Commands
 
+    }
     /**
      * The contract code for the [IOUContract].
      * The constraints are self documenting so don't require any additional explanation.
      */
     override fun verify(tx: LedgerTransaction) {
-        // Add contract code here.
-        // requireThat {
-        //     ...
-        // }
+        requireThat {
+            val command = tx.commands.requireSingleCommand<IOUContract.Commands>()
+            when (command.value){
+                is Commands.Issue -> requireThat {
+                    "No inputs should be consumed when issuing an IOU." using(tx.inputs.isEmpty())
+
+                    "Only one output state should be created when issuing an IOU." using(tx.outputs.size == 1)
+                    val iou = tx.outputStates.first() as IOUState
+
+                    "A newly issued IOU must have a positive amount." using( iou.amount > Amount(0,iou.amount.token))
+
+                    "The lender and borrower cannot have the same identity." using(
+                            iou.borrower != iou.lender
+                            )
+
+                    "Both lender and borrower together only may sign IOU issue transaction." using(
+
+                            command.signers.toSet() == iou.participants.map{it.owningKey}.toSet()
+                            )
+                }
+                is Commands.Transfer -> requireThat{
+
+                }
+            }
+
+
+        }
     }
 }
