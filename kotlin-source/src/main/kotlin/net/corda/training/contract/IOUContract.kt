@@ -23,7 +23,7 @@ class IOUContract : Contract {
     interface Commands : CommandData {
         class Issue :TypeOnlyCommandData(), Commands
         class Transfer :TypeOnlyCommandData(), Commands
-
+        class Settle :TypeOnlyCommandData(), Commands
     }
     /**
      * The contract code for the [IOUContract].
@@ -68,6 +68,11 @@ class IOUContract : Contract {
                                     union
                                     (inputIou.participants.map{it.owningKey}.toSet())
                             )
+
+                }
+                is Commands.Settle -> requireThat{
+                    val ious = tx.groupStates<IOUState,UniqueIdentifier> {it.linearId  }.single()
+                    "There must be one input IOU." using( ious.inputs.size == 1)
 
 
 
