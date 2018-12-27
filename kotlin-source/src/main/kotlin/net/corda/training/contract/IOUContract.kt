@@ -1,6 +1,7 @@
 package net.corda.training.contract
 
 import net.corda.core.contracts.*
+import net.corda.core.contracts.Requirements.using
 import net.corda.core.transactions.LedgerTransaction
 import net.corda.training.state.IOUState
 
@@ -50,6 +51,26 @@ class IOUContract : Contract {
                             )
                 }
                 is Commands.Transfer -> requireThat{
+                    "An IOU transfer transaction should only consume one input state." using(tx.inputs.size == 1)
+
+                    "An IOU transfer transaction should only create one output state." using(tx.outputs.size ==1)
+
+                    val outputIou = tx.outputStates.first() as IOUState
+                    val inputIou = tx.inputStates.first() as IOUState
+
+                    "Only the lender property may change." using (outputIou.borrower == inputIou.borrower)
+                    "Only the lender property may change." using (inputIou == outputIou.withNewLender(inputIou.lender))
+                    "The lender property must change in a transfer." using( outputIou.lender != inputIou.lender)
+
+                    "The borrower, old lender and new lender only must sign an IOU transfer transaction" using(
+                            command.signers.toSet() ==
+                                    (outputIou.participants.map{it.owningKey}.toSet())
+                                    union
+                                    (inputIou.participants.map{it.owningKey}.toSet())
+                            )
+
+
+
 
                 }
             }
