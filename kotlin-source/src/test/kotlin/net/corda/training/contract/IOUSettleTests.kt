@@ -174,29 +174,29 @@ class IOUSettleTests {
 //     * Hint:
 //     * - Use the [outputsOfType] extension function to filter the transaction's outputs by type, in this case [Cash.State].
 //     */
-//    @Test
-//    fun mustBeCashOutputStatesPresent() {
-//        val iou = IOUState(10.DOLLARS, ALICE.party, BOB.party)
-//        val cash = createCashState(5.DOLLARS, BOB.party)
-//        val cashPayment = cash.withNewOwner(newOwner = ALICE.party)
-//        ledgerServices.ledger {
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.DOLLARS))
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                this `fails with` "There must be output cash."
-//            }
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                input(IOUContract.IOU_CONTRACT_ID, cash)
-//                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.DOLLARS))
-//                output(IOUContract.IOU_CONTRACT_ID, cashPayment.ownableState)
-//                command(BOB.publicKey, cashPayment.command)
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                this.verifies()
-//            }
-//        }
-//    }
+    @Test
+    fun mustBeCashOutputStatesPresent() {
+        val iou = IOUState(10.DOLLARS, ALICE.party, BOB.party)
+        val cash = createCashState(5.DOLLARS, BOB.party)
+        val cashPayment = cash.withNewOwner(newOwner = ALICE.party)
+        ledgerServices.ledger {
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.DOLLARS))
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                this `fails with` "There must be output cash."
+            }
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                input(IOUContract.IOU_CONTRACT_ID, cash)
+                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.DOLLARS))
+                output(IOUContract.IOU_CONTRACT_ID, cashPayment.ownableState)
+                command(BOB.publicKey, cashPayment.command)
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                this.verifies()
+            }
+        }
+    }
 //
 //    /**
 //     * Task 5.
@@ -209,33 +209,33 @@ class IOUSettleTests {
 //     * - Use [filter] to filter over the list of cash states to get the ones which are being assigned to us.
 //     * - Once we have this filtered list, we can sum the cash being paid to us so we know how much is being settled.
 //     */
-//    @Test
-//    fun mustBeCashOutputStatesWithRecipientAsOwner() {
-//        val iou = IOUState(10.POUNDS, ALICE.party, BOB.party)
-//        val cash = createCashState(5.POUNDS, BOB.party)
-//        val invalidCashPayment = cash.withNewOwner(newOwner = CHARLIE.party)
-//        val validCashPayment = cash.withNewOwner(newOwner = ALICE.party)
-//        ledgerServices.ledger {
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                input(IOUContract.IOU_CONTRACT_ID, cash)
-//                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.POUNDS))
-//                output(IOUContract.IOU_CONTRACT_ID, "outputs cash", invalidCashPayment.ownableState)
-//                command(BOB.publicKey, invalidCashPayment.command)
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                this `fails with` "There must be output cash paid to the recipient."
-//            }
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                input(IOUContract.IOU_CONTRACT_ID, cash)
-//                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.POUNDS))
-//                output(IOUContract.IOU_CONTRACT_ID, validCashPayment.ownableState)
-//                command(BOB.publicKey, validCashPayment.command)
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                this.verifies()
-//            }
-//        }
-//    }
+    @Test
+    fun mustBeCashOutputStatesWithRecipientAsOwner() {
+        val iou = IOUState(10.POUNDS, ALICE.party, BOB.party)
+        val cash = createCashState(5.POUNDS, BOB.party)
+        val invalidCashPayment = cash.withNewOwner(newOwner = CHARLIE.party)
+        val validCashPayment = cash.withNewOwner(newOwner = ALICE.party)
+        ledgerServices.ledger {
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                input(IOUContract.IOU_CONTRACT_ID, cash)
+                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.POUNDS))
+                output(IOUContract.IOU_CONTRACT_ID, "outputs cash", invalidCashPayment.ownableState)
+                command(BOB.publicKey, invalidCashPayment.command)
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                this `fails with` "There must be output cash paid to the recipient."
+            }
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                input(IOUContract.IOU_CONTRACT_ID, cash)
+                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.POUNDS))
+                output(IOUContract.IOU_CONTRACT_ID, validCashPayment.ownableState)
+                command(BOB.publicKey, validCashPayment.command)
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                this.verifies()
+            }
+        }
+    }
 //
 //    /**
 //     * Task 6.
@@ -250,41 +250,41 @@ class IOUSettleTests {
 //     * - We can compare the amount left paid to the amount being paid to use, ensuring the amount being paid isn't too
 //     *   much.
 //     */
-//    @Test
-//    fun cashSettlementAmountMustBeLessThanRemainingIOUAmount() {
-//        val iou = IOUState(10.DOLLARS, ALICE.party, BOB.party)
-//        val elevenDollars = createCashState(11.DOLLARS, BOB.party)
-//        val tenDollars = createCashState(10.DOLLARS, BOB.party)
-//        val fiveDollars = createCashState(5.DOLLARS, BOB.party)
-//        ledgerServices.ledger {
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                input(IOUContract.IOU_CONTRACT_ID, elevenDollars)
-//                output(IOUContract.IOU_CONTRACT_ID, iou.pay(11.DOLLARS))
-//                output(IOUContract.IOU_CONTRACT_ID, elevenDollars.withNewOwner(newOwner = ALICE.party).ownableState)
-//                command(BOB.publicKey, elevenDollars.withNewOwner(newOwner = ALICE.party).command)
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                this `fails with` "The amount settled cannot be more than the amount outstanding."
-//            }
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                input(IOUContract.IOU_CONTRACT_ID, fiveDollars)
-//                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.DOLLARS))
-//                output(IOUContract.IOU_CONTRACT_ID, fiveDollars.withNewOwner(newOwner = ALICE.party).ownableState)
-//                command(BOB.publicKey, fiveDollars.withNewOwner(newOwner = ALICE.party).command)
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                this.verifies()
-//            }
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                input(IOUContract.IOU_CONTRACT_ID, tenDollars)
-//                output(IOUContract.IOU_CONTRACT_ID, tenDollars.withNewOwner(newOwner = ALICE.party).ownableState)
-//                command(BOB.publicKey, tenDollars.withNewOwner(newOwner = ALICE.party).command)
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                this.verifies()
-//            }
-//        }
-//    }
+    @Test
+    fun cashSettlementAmountMustBeLessThanRemainingIOUAmount() {
+        val iou = IOUState(10.DOLLARS, ALICE.party, BOB.party)
+        val elevenDollars = createCashState(11.DOLLARS, BOB.party)
+        val tenDollars = createCashState(10.DOLLARS, BOB.party)
+        val fiveDollars = createCashState(5.DOLLARS, BOB.party)
+        ledgerServices.ledger {
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                input(IOUContract.IOU_CONTRACT_ID, elevenDollars)
+                output(IOUContract.IOU_CONTRACT_ID, iou.pay(11.DOLLARS))
+                output(IOUContract.IOU_CONTRACT_ID, elevenDollars.withNewOwner(newOwner = ALICE.party).ownableState)
+                command(BOB.publicKey, elevenDollars.withNewOwner(newOwner = ALICE.party).command)
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                this `fails with` "The amount settled cannot be more than the amount outstanding."
+            }
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                input(IOUContract.IOU_CONTRACT_ID, fiveDollars)
+                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.DOLLARS))
+                output(IOUContract.IOU_CONTRACT_ID, fiveDollars.withNewOwner(newOwner = ALICE.party).ownableState)
+                command(BOB.publicKey, fiveDollars.withNewOwner(newOwner = ALICE.party).command)
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                this.verifies()
+            }
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                input(IOUContract.IOU_CONTRACT_ID, tenDollars)
+                output(IOUContract.IOU_CONTRACT_ID, tenDollars.withNewOwner(newOwner = ALICE.party).ownableState)
+                command(BOB.publicKey, tenDollars.withNewOwner(newOwner = ALICE.party).command)
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                this.verifies()
+            }
+        }
+    }
 //
 //    /**
 //     * Task 7.
@@ -292,31 +292,31 @@ class IOUSettleTests {
 //     * in the currency that the IOU in denominated in.
 //     * TODO: You shouldn't have anything to do here but here are some tests just to make sure!
 //     */
-//    @Test
-//    fun cashSettlementMustBeInTheCorrectCurrency() {
-//        val iou = IOUState(10.DOLLARS, ALICE.party, BOB.party)
-//        val tenDollars = createCashState(10.DOLLARS, BOB.party)
-//        val tenPounds = createCashState(10.POUNDS, BOB.party)
-//        ledgerServices.ledger {
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                input(IOUContract.IOU_CONTRACT_ID, tenPounds)
-//                output(IOUContract.IOU_CONTRACT_ID, tenPounds.withNewOwner(newOwner = ALICE.party).ownableState)
-//                command(BOB.publicKey, tenPounds.withNewOwner(newOwner = ALICE.party).command)
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                this `fails with` "Token mismatch: GBP vs USD"
-//            }
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                input(IOUContract.IOU_CONTRACT_ID, tenDollars)
-//                output(IOUContract.IOU_CONTRACT_ID, tenDollars.withNewOwner(newOwner = ALICE.party).ownableState)
-//                command(BOB.publicKey, tenDollars.withNewOwner(newOwner = ALICE.party).command)
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                this.verifies()
-//            }
-//        }
-//    }
-//
+    @Test
+    fun cashSettlementMustBeInTheCorrectCurrency() {
+        val iou = IOUState(10.DOLLARS, ALICE.party, BOB.party)
+        val tenDollars = createCashState(10.DOLLARS, BOB.party)
+        val tenPounds = createCashState(10.POUNDS, BOB.party)
+        ledgerServices.ledger {
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                input(IOUContract.IOU_CONTRACT_ID, tenPounds)
+                output(IOUContract.IOU_CONTRACT_ID, tenPounds.withNewOwner(newOwner = ALICE.party).ownableState)
+                command(BOB.publicKey, tenPounds.withNewOwner(newOwner = ALICE.party).command)
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                this `fails with` "Token mismatch: GBP vs USD"
+            }
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                input(IOUContract.IOU_CONTRACT_ID, tenDollars)
+                output(IOUContract.IOU_CONTRACT_ID, tenDollars.withNewOwner(newOwner = ALICE.party).ownableState)
+                command(BOB.publicKey, tenDollars.withNewOwner(newOwner = ALICE.party).command)
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                this.verifies()
+            }
+        }
+    }
+
 //    /**
 //     * Task 8.
 //     * If we fully settle the IOU, then we are done and thus don't require one on ledgerServices.ledger anymore. However, if we only
@@ -324,97 +324,97 @@ class IOUSettleTests {
 //     * TODO: Write a constraint that ensures the correct behaviour depending on the amount settled vs amount remaining.
 //     * Hint: You can use a simple if statement and compare the total amount paid vs amount left to settle.
 //     */
-//    @Test
-//    fun mustOnlyHaveOutputIOUIfNotFullySettling() {
-//        val iou = IOUState(10.DOLLARS, ALICE.party, BOB.party)
-//        val tenDollars = createCashState(10.DOLLARS, BOB.party)
-//        val fiveDollars = createCashState(5.DOLLARS, BOB.party)
-//        ledgerServices.ledger {
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                input(IOUContract.IOU_CONTRACT_ID, fiveDollars)
-//                output(IOUContract.IOU_CONTRACT_ID, fiveDollars.withNewOwner(newOwner = ALICE.party).ownableState)
-//                command(BOB.publicKey, fiveDollars.withNewOwner(newOwner = BOB.party).command)
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                this `fails with` "There must be one output IOU."
-//            }
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                input(IOUContract.IOU_CONTRACT_ID, fiveDollars)
-//                output(IOUContract.IOU_CONTRACT_ID, fiveDollars.withNewOwner(newOwner = ALICE.party).ownableState)
-//                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.DOLLARS))
-//                command(BOB.publicKey, fiveDollars.withNewOwner(newOwner = BOB.party).command)
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                verifies()
-//            }
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, tenDollars)
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                output(IOUContract.IOU_CONTRACT_ID, iou.pay(10.DOLLARS))
-//                output(IOUContract.IOU_CONTRACT_ID, tenDollars.withNewOwner(newOwner = ALICE.party).ownableState)
-//                command(BOB.publicKey, tenDollars.withNewOwner(newOwner = BOB.party).command)
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                this `fails with` "There must be no output IOU as it has been fully settled."
-//            }
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, tenDollars)
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                output(IOUContract.IOU_CONTRACT_ID, tenDollars.withNewOwner(newOwner = ALICE.party).ownableState)
-//                command(BOB.publicKey, tenDollars.withNewOwner(newOwner = BOB.party).command)
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                verifies()
-//            }
-//        }
-//    }
-//
+    @Test
+    fun mustOnlyHaveOutputIOUIfNotFullySettling() {
+        val iou = IOUState(10.DOLLARS, ALICE.party, BOB.party)
+        val tenDollars = createCashState(10.DOLLARS, BOB.party)
+        val fiveDollars = createCashState(5.DOLLARS, BOB.party)
+        ledgerServices.ledger {
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                input(IOUContract.IOU_CONTRACT_ID, fiveDollars)
+                output(IOUContract.IOU_CONTRACT_ID, fiveDollars.withNewOwner(newOwner = ALICE.party).ownableState)
+                command(BOB.publicKey, fiveDollars.withNewOwner(newOwner = BOB.party).command)
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                this `fails with` "There must be one output IOU."
+            }
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                input(IOUContract.IOU_CONTRACT_ID, fiveDollars)
+                output(IOUContract.IOU_CONTRACT_ID, fiveDollars.withNewOwner(newOwner = ALICE.party).ownableState)
+                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.DOLLARS))
+                command(BOB.publicKey, fiveDollars.withNewOwner(newOwner = BOB.party).command)
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                verifies()
+            }
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, tenDollars)
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                output(IOUContract.IOU_CONTRACT_ID, iou.pay(10.DOLLARS))
+                output(IOUContract.IOU_CONTRACT_ID, tenDollars.withNewOwner(newOwner = ALICE.party).ownableState)
+                command(BOB.publicKey, tenDollars.withNewOwner(newOwner = BOB.party).command)
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                this `fails with` "There must be no output IOU as it has been fully settled."
+            }
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, tenDollars)
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                output(IOUContract.IOU_CONTRACT_ID, tenDollars.withNewOwner(newOwner = ALICE.party).ownableState)
+                command(BOB.publicKey, tenDollars.withNewOwner(newOwner = BOB.party).command)
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                verifies()
+            }
+        }
+    }
+
 //    /**
 //     * Task 9.
 //     * We want to make sure that the only property of the IOU which changes when we settle, is the paid amount.
 //     * TODO: Write a constraint to check only the paid property of the [IOUState] changes when settling.
 //     */
-//    @Test
-//    fun onlyPaidPropertyMayChange() {
-//        val iou = IOUState(10.DOLLARS, ALICE.party, BOB.party)
-//        val fiveDollars = createCashState(5.DOLLARS, BOB.party)
-//        ledgerServices.ledger {
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                input(IOUContract.IOU_CONTRACT_ID, fiveDollars)
-//                output(IOUContract.IOU_CONTRACT_ID, fiveDollars.withNewOwner(newOwner = ALICE.party).ownableState)
-//                output(IOUContract.IOU_CONTRACT_ID, iou.copy(borrower = ALICE.party, paid = 5.DOLLARS))
-//                command(BOB.publicKey, fiveDollars.withNewOwner(newOwner = BOB.party).command)
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                this `fails with` "The borrower may not change when settling."
-//            }
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                input(IOUContract.IOU_CONTRACT_ID, fiveDollars)
-//                output(IOUContract.IOU_CONTRACT_ID, fiveDollars.withNewOwner(newOwner = ALICE.party).ownableState)
-//                output(IOUContract.IOU_CONTRACT_ID, iou.copy(amount = 0.DOLLARS, paid = 5.DOLLARS))
-//                command(BOB.publicKey, fiveDollars.withNewOwner(newOwner = BOB.party).command)
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                this `fails with` "The amount may not change when settling."
-//            }
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                input(IOUContract.IOU_CONTRACT_ID, fiveDollars)
-//                output(IOUContract.IOU_CONTRACT_ID, fiveDollars.withNewOwner(newOwner = ALICE.party).ownableState)
-//                output(IOUContract.IOU_CONTRACT_ID, iou.copy(lender = CHARLIE.party, paid = 5.DOLLARS))
-//                command(BOB.publicKey, fiveDollars.withNewOwner(newOwner = BOB.party).command)
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                this `fails with` "The lender may not change when settling."
-//            }
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                input(IOUContract.IOU_CONTRACT_ID, fiveDollars)
-//                output(IOUContract.IOU_CONTRACT_ID, fiveDollars.withNewOwner(newOwner = ALICE.party).ownableState)
-//                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.DOLLARS))
-//                command(BOB.publicKey, fiveDollars.withNewOwner(newOwner = BOB.party).command)
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                verifies()
-//            }
-//        }
-//    }
+    @Test
+    fun onlyPaidPropertyMayChange() {
+        val iou = IOUState(10.DOLLARS, ALICE.party, BOB.party)
+        val fiveDollars = createCashState(5.DOLLARS, BOB.party)
+        ledgerServices.ledger {
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                input(IOUContract.IOU_CONTRACT_ID, fiveDollars)
+                output(IOUContract.IOU_CONTRACT_ID, fiveDollars.withNewOwner(newOwner = ALICE.party).ownableState)
+                output(IOUContract.IOU_CONTRACT_ID, iou.copy(borrower = ALICE.party, paid = 5.DOLLARS))
+                command(BOB.publicKey, fiveDollars.withNewOwner(newOwner = BOB.party).command)
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                this `fails with` "The borrower may not change when settling."
+            }
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                input(IOUContract.IOU_CONTRACT_ID, fiveDollars)
+                output(IOUContract.IOU_CONTRACT_ID, fiveDollars.withNewOwner(newOwner = ALICE.party).ownableState)
+                output(IOUContract.IOU_CONTRACT_ID, iou.copy(amount = 0.DOLLARS, paid = 5.DOLLARS))
+                command(BOB.publicKey, fiveDollars.withNewOwner(newOwner = BOB.party).command)
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                this `fails with` "The amount may not change when settling."
+            }
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                input(IOUContract.IOU_CONTRACT_ID, fiveDollars)
+                output(IOUContract.IOU_CONTRACT_ID, fiveDollars.withNewOwner(newOwner = ALICE.party).ownableState)
+                output(IOUContract.IOU_CONTRACT_ID, iou.copy(lender = CHARLIE.party, paid = 5.DOLLARS))
+                command(BOB.publicKey, fiveDollars.withNewOwner(newOwner = BOB.party).command)
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                this `fails with` "The lender may not change when settling."
+            }
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                input(IOUContract.IOU_CONTRACT_ID, fiveDollars)
+                output(IOUContract.IOU_CONTRACT_ID, fiveDollars.withNewOwner(newOwner = ALICE.party).ownableState)
+                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.DOLLARS))
+                command(BOB.publicKey, fiveDollars.withNewOwner(newOwner = BOB.party).command)
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                verifies()
+            }
+        }
+    }
 //
 //    /**
 //     * Task 10.

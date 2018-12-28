@@ -3,6 +3,8 @@ package net.corda.training.contract
 import net.corda.core.contracts.*
 import net.corda.core.contracts.Requirements.using
 import net.corda.core.transactions.LedgerTransaction
+import net.corda.finance.contracts.asset.Cash
+import net.corda.finance.utils.sumCash
 import net.corda.training.state.IOUState
 
 /**
@@ -73,6 +75,30 @@ class IOUContract : Contract {
                 is Commands.Settle -> requireThat{
                     val ious = tx.groupStates<IOUState,UniqueIdentifier> {it.linearId  }.single()
                     "There must be one input IOU." using( ious.inputs.size == 1)
+                    val cashs = tx.outputsOfType<Cash.State>()
+                    "There must be output cash." using( cashs.isNotEmpty())
+                    "There must be output cash paid to the recipient." using( cashs.filter{it.owner == ious.inputs.single().lender}.isNotEmpty())
+                    val inputIou = ious.inputs.single()
+                    val amountOutstanding = inputIou.amount - inputIou.paid
+                    val acceptableCash = cashs.filter { it.owner == inputIou.lender }
+                    val sumAcceptableCash = acceptableCash.sumCash().withoutIssuer()
+                    "The amount settled cannot be more than the amount outstanding." using(amountOutstanding >= sumAcceptableCash)
+                    "Token mismatch: GBP vs USD" using(amountOutstanding.token == sumAcceptableCash.token)
+
+                    if(amountOutstanding == sumAcceptableCash){
+                        "There must be no output IOU as it has been fully settled." using(ious.outputs.size ==0)
+
+                    }else {
+                        "There must be one output IOU." using (ious.outputs.size == 1)
+                        "The borrower may not change when settling." using(ious.inputs.single().borrower == ious.outputs.single().borrower)
+                        "The amount may not change when settling." using (ious.inputs.single().amount == ious.outputs.single().amount)
+                        "The lender may not change when settling." using(ious.inputs.single().lender == ious.outputs.single().lender)
+
+                    }
+
+
+
+
 
 
 
