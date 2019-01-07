@@ -421,40 +421,40 @@ class IOUSettleTests {
 //     * Both the lender and the borrower must have signed an IOU issue transaction.
 //     * TODO: Add a constraint to the contract code that ensures this is the case.
 //     */
-//    @Test
-//    fun mustBeSignedByAllParticipants() {
-//        val iou = IOUState(10.DOLLARS, ALICE.party, BOB.party)
-//        val cash = createCashState(5.DOLLARS, BOB.party)
-//        val cashPayment = cash.withNewOwner(newOwner = ALICE.party)
-//        ledgerServices.ledger {
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, cash)
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                output(IOUContract.IOU_CONTRACT_ID, cashPayment.ownableState)
-//                command(BOB.publicKey, cashPayment.command)
-//                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.DOLLARS))
-//                command(listOf(ALICE.publicKey, CHARLIE.publicKey), IOUContract.Commands.Settle())
-//                failsWith("Both lender and borrower together only must sign IOU settle transaction.")
-//            }
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, cash)
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                output(IOUContract.IOU_CONTRACT_ID, cashPayment.ownableState)
-//                command(BOB.publicKey, cashPayment.command)
-//                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.DOLLARS))
-//                command(BOB.publicKey, IOUContract.Commands.Settle())
-//                failsWith("Both lender and borrower together only must sign IOU settle transaction.")
-//            }
-//            transaction {
-//                input(IOUContract.IOU_CONTRACT_ID, cash)
-//                input(IOUContract.IOU_CONTRACT_ID, iou)
-//                output(IOUContract.IOU_CONTRACT_ID, cashPayment.ownableState)
-//                command(BOB.publicKey, cashPayment.command)
-//                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.DOLLARS))
-//                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
-//                verifies()
-//            }
-//        }
-//    }
+    @Test
+    fun mustBeSignedByAllParticipants() {
+        val iou = IOUState(10.DOLLARS, ALICE.party, BOB.party)
+        val cash = createCashState(5.DOLLARS, BOB.party)
+        val cashPayment = cash.withNewOwner(newOwner = ALICE.party)
+        ledgerServices.ledger {
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, cash)
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                output(IOUContract.IOU_CONTRACT_ID, cashPayment.ownableState)
+                command(BOB.publicKey, cashPayment.command)
+                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.DOLLARS))
+                command(listOf(ALICE.publicKey, CHARLIE.publicKey), IOUContract.Commands.Settle())
+                failsWith("Both lender and borrower together only must sign IOU settle transaction.")
+            }
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, cash)
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                output(IOUContract.IOU_CONTRACT_ID, cashPayment.ownableState)
+                command(BOB.publicKey, cashPayment.command)
+                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.DOLLARS))
+                command(BOB.publicKey, IOUContract.Commands.Settle())
+                failsWith("Both lender and borrower together only must sign IOU settle transaction.")
+            }
+            transaction {
+                input(IOUContract.IOU_CONTRACT_ID, cash)
+                input(IOUContract.IOU_CONTRACT_ID, iou)
+                output(IOUContract.IOU_CONTRACT_ID, cashPayment.ownableState)
+                command(BOB.publicKey, cashPayment.command)
+                output(IOUContract.IOU_CONTRACT_ID, iou.pay(5.DOLLARS))
+                command(listOf(ALICE.publicKey, BOB.publicKey), IOUContract.Commands.Settle())
+                verifies()
+            }
+        }
+    }
 }
 
