@@ -1,22 +1,16 @@
 package net.corda.training.flow
 
 import co.paralleluniverse.fibers.Suspendable
-import net.corda.core.contracts.Amount
-import net.corda.core.contracts.UniqueIdentifier
-import net.corda.core.contracts.requireThat
-import net.corda.core.flows.CollectSignaturesFlow
-import net.corda.core.flows.FinalityFlow
-import net.corda.core.flows.FlowLogic
-import net.corda.core.flows.FlowSession
-import net.corda.core.flows.InitiatedBy
-import net.corda.core.flows.InitiatingFlow
-import net.corda.core.flows.SignTransactionFlow
-import net.corda.core.flows.StartableByRPC
+import net.corda.core.contracts.*
+import net.corda.core.flows.*
+import net.corda.core.node.services.queryBy
+import net.corda.core.node.services.vault.QueryCriteria
 import net.corda.core.transactions.SignedTransaction
 import net.corda.core.transactions.TransactionBuilder
 import net.corda.core.utilities.OpaqueBytes
 import net.corda.finance.contracts.asset.Cash
 import net.corda.finance.flows.CashIssueFlow
+import net.corda.training.contract.IOUContract
 import net.corda.training.state.IOUState
 import java.util.*
 
@@ -31,10 +25,26 @@ import java.util.*
 class IOUSettleFlow(val linearId: UniqueIdentifier, val amount: Amount<Currency>): FlowLogic<SignedTransaction>() {
     @Suspendable
     override fun call(): SignedTransaction {
-        // Placeholder code to avoid type error when running the tests. Remove before starting the flow task!
-        return serviceHub.signInitialTransaction(
-                TransactionBuilder(notary = null)
-        )
+
+        val queryCriteria = QueryCriteria.LinearStateQueryCriteria(linearId = listOf(linearId))
+        val iouToSettle = serviceHub.vaultService.queryBy<IOUState>(queryCriteria).states.single()
+        val counterparty = iouToSettle.state.data.lender
+        if ( ourIdentity != iouToSettle.state.data.borrower){
+            throw IllegalArgumentException("IOU settlement flow must be initiated by the borrower.")
+        }
+
+
+
+        val notary = serviceHub.networkMapCache.notaryIdentities.first()
+        val settleCommand = Command(IOUContract.Commands.Settle(),listOf(ourIdentity.owningKey,counterparty.owningKey))
+        val builder = TransactionBuilder(notary = notary)
+        builder.withItems(iouToSettle,settleCommand)
+        builder.verify(serviceHub)
+        val signedTx = serviceHub.signInitialTransaction(builder)
+
+        val stx = subFlow(CollectSignaturesFlow(signedTx, listOf(initiateFlow(counterparty))))
+        return subFlow(FinalityFlow(stx))
+
     }
 }
 
