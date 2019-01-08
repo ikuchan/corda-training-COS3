@@ -26,8 +26,11 @@ class IOUIssueFlow(val state: IOUState) : FlowLogic<SignedTransaction>() {
         val issueCommand = Command(IOUContract.Commands.Issue(),state.participants.map{it.owningKey})
         val builder = TransactionBuilder(notary = notary)
         builder.withItems(StateAndContract(state,IOUContract.IOU_CONTRACT_ID),issueCommand)
+        builder.verify(serviceHub)
         val signedTx = serviceHub.signInitialTransaction(builder)
-        return signedTx
+        val sessions = (state.participants - ourIdentity).map { initiateFlow(it)}.toSet()
+        val stx = subFlow(CollectSignaturesFlow(signedTx,sessions))
+        return subFlow(FinalityFlow(stx))
     }
 }
 
