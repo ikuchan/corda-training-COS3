@@ -1,7 +1,14 @@
 buildscript {
-    ext.corda_release_version = '3.3-corda'
-    ext.corda_release_distribution = 'net.corda'
-    ext.corda_gradle_plugins_version = '3.0.9'
+//    ext.corda_release_version = '3.3-corda'
+//    ext.corda_release_distribution = 'net.corda'
+//    ext.corda_gradle_plugins_version = '3.0.9'
+
+    ext.corda_release_group = 'com.r3.corda'
+    ext.corda_release_distribution = 'com.r3.corda'
+    ext.corda_release_version = '3.3'
+    ext.corda_gradle_plugins_version = '4.0.25'
+
+
     ext.kotlin_version = '1.2.70'
     ext.junit_version = '4.12'
     ext.quasar_version = '0.7.9'

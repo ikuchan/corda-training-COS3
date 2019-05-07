@@ -7,6 +7,7 @@ import net.corda.finance.contracts.asset.Cash
 import net.corda.finance.utils.sumCash
 import net.corda.training.state.IOUState
 
+
 /**
  * This is where you'll add the contract code which defines how the [IOUState] behaves. Look at the unit tests in
  * [IOUContractTests] for instructions on how to complete the [IOUContract] class.
